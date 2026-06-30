@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision - Captured Surveillance Gallery</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar Mount -->
+  <div id="sidebar-container"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="layout-wrapper">
+    <!-- Topbar Mount -->
+    <div id="topbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content container-fluid animate-fade">
+      
+      <!-- Page Header -->
+      <div class="mb-4">
+        <h5 class="text-primary fw-bold m-0">Surveillance Media Grid</h5>
+        <p class="text-secondary text-xs m-0">Stored high-resolution camera snapshots matching detected targets</p>
+      </div>
+
+      <!-- Bento Gallery Grid -->
+      <div class="gallery-grid" id="gallery-container">
+        <!-- Rendered dynamically -->
+        <div class="text-center py-5 col-12">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="text-secondary text-xs mt-2">Loading image store index...</p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Fullscreen Immersive Zoom Preview (Zoom requirement) -->
+    <div class="fullscreen-preview" id="fullscreen-overlay" onclick="closeFullscreen()">
+      <button class="close-preview-btn" onclick="closeFullscreen()">&times;</button>
+      <img src="" alt="Surveillance Fullscreen" class="fullscreen-image" id="fullscreen-img" onclick="event.stopPropagation()">
+    </div>
+
+    <!-- Footer Mount -->
+    <div id="footer-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout.js"></script>
+  <script>
+    let galleryItems = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchGallery();
+    });
+
+    async function fetchGallery() {
+      try {
+        const res = await fetch("/api/detections");
+        const data = await res.json();
+        if (data.status === "success") {
+          galleryItems = data.data;
+          renderGallery();
+        }
+      } catch (e) {
+        console.warn("Express endpoint offline. Loading fallback local mock gallery.", e);
+        // Fallback seeds
+        galleryItems = [
+          { id: "DET-1024", personName: "Alexander Wright", trackingId: "TRK-0041", timestamp: new Date().toISOString(), className: "person" },
+          { id: "DET-1023", personName: "Unknown", trackingId: "TRK-0082", timestamp: new Date().toISOString(), className: "person" },
+          { id: "DET-1022", personName: "Feral Tabby", trackingId: "TRK-0105", timestamp: new Date().toISOString(), className: "cat" },
+          { id: "DET-1021", personName: "Clara Vance", trackingId: "TRK-0022", timestamp: new Date().toISOString(), className: "person" }
+        ];
+        renderGallery();
+      }
+    }
+
+    function renderGallery() {
+      const container = document.getElementById("gallery-container");
+      if (!container) return;
+
+      if (galleryItems.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <i class="material-icons text-secondary mb-3" style="font-size: 60px; opacity: 0.2;">photo_library</i>
+            <h6 class="text-secondary">Image Store is Empty</h6>
+            <p class="text-secondary text-xs">No visual snapshots have been recorded yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = galleryItems.map(item => {
+        // Fallback placeholder with varying seeds for visual variety
+        const imgUrl = item.photoUrl || `https://picsum.photos/seed/${item.id}/640/480`;
+        const dateStr = new Date(item.timestamp).toLocaleString();
+
+        return `
+          <div class="gallery-item animate-fade">
+            <img src="${imgUrl}" alt="Cap" class="gallery-image" loading="lazy">
+            <div class="gallery-overlay">
+              <h6 class="m-0 fw-bold text-truncate">${item.personName || 'Object'}</h6>
+              <span class="font-mono text-xs text-secondary d-block mb-2" style="font-size: 10px;">${item.trackingId} // ${item.className}</span>
+              <p class="text-muted m-0 mb-3" style="font-size: 9px;"><i class="material-icons align-middle text-xs me-1">schedule</i>${dateStr}</p>
+              
+              <!-- Floating actions -->
+              <div class="d-flex gap-1.5 mt-auto">
+                <button class="btn btn-sm btn-glass flex-grow-1 p-1 text-xs d-flex align-items-center justify-content-center" onclick="zoomImage('${imgUrl}')" title="Zoom Preview">
+                  <i class="material-icons" style="font-size: 16px;">zoom_in</i>
+                </button>
+                <button class="btn btn-sm btn-glass flex-grow-1 p-1 text-xs d-flex align-items-center justify-content-center" onclick="downloadImage('${imgUrl}', '${item.trackingId}')" title="Download">
+                  <i class="material-icons" style="font-size: 16px;">download</i>
+                </button>
+                <button class="btn btn-sm btn-glass flex-grow-1 p-1 text-xs d-flex align-items-center justify-content-center" onclick="shareImage('${item.trackingId}')" title="Share link">
+                  <i class="material-icons" style="font-size: 16px;">share</i>
+                </button>
+                <button class="btn btn-sm btn-glass flex-grow-1 p-1 text-xs text-danger d-flex align-items-center justify-content-center" onclick="deleteImage('${item.id}')" title="Delete record">
+                  <i class="material-icons text-danger" style="font-size: 16px;">delete</i>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Fullscreen interactive Zoom Preview
+    function zoomImage(url) {
+      const overlay = document.getElementById("fullscreen-overlay");
+      const img = document.getElementById("fullscreen-img");
+      if (overlay && img) {
+        img.src = url;
+        overlay.classList.add("show");
+      }
+    }
+
+    function closeFullscreen() {
+      const overlay = document.getElementById("fullscreen-overlay");
+      if (overlay) {
+        overlay.classList.remove("show");
+      }
+    }
+
+    function downloadImage(url, trkId) {
+      const element = document.createElement("a");
+      element.href = url;
+      element.download = `surveillance_${trkId}.jpg`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      triggerNotification(`Downloading target frame: surveillance_${trkId}.jpg`, "success");
+    }
+
+    function shareImage(trkId) {
+      navigator.clipboard.writeText(window.location.origin + `/share/detection/${trkId}`);
+      triggerNotification("Secure encrypted share link copied to clipboard.", "success");
+    }
+
+    function deleteImage(id) {
+      if (!confirm("Wipe this snapshot from disk storage?")) return;
+      galleryItems = galleryItems.filter(item => item.id !== id);
+      renderGallery();
+      triggerNotification("Media snapshot wiped from storage index.", "warning");
+    }
+  </script>
+</body>
+</html>

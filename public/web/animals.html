@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision - Animal Intrusions Log</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar Mount -->
+  <div id="sidebar-container"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="layout-wrapper">
+    <!-- Topbar Mount -->
+    <div id="topbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content container-fluid animate-fade">
+      
+      <!-- Action Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h5 class="text-primary fw-bold m-0">Wildlife Activity Logs</h5>
+          <p class="text-secondary text-xs m-0">Animal perimeter breaches identified on infrared surveillance</p>
+        </div>
+        <button class="btn btn-glass btn-sm d-flex align-items-center gap-1.5" onclick="simulateAnimalBreach()">
+          <i class="material-icons text-success" style="font-size: 18px;">pets</i>
+          <span>Simulate Animal Breach</span>
+        </button>
+      </div>
+
+      <!-- Grid list -->
+      <div class="row g-4" id="animals-grid">
+        <!-- Rendered dynamically -->
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="text-secondary text-xs mt-2">Checking boundary sensors...</p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Mount -->
+    <div id="footer-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout.js"></script>
+  <script>
+    let animalLogs = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchAnimals();
+    });
+
+    async function fetchAnimals() {
+      try {
+        const res = await fetch("/api/detections");
+        const data = await res.json();
+        if (data.status === "success") {
+          animalLogs = data.data.filter(log => log.type === "animal");
+          renderAnimals();
+        }
+      } catch (e) {
+        console.warn("Express backend offline. Loading fallback animal intrusions.", e);
+        animalLogs = [
+          { id: "DET-1022", className: "cat", confidence: 0.94, personName: "Feral Tabby", trackingId: "TRK-0105", cameraId: "Perimeter West Wall", timestamp: new Date(Date.now() - 3600000).toISOString(), note: "Feline animal detected traversing secondary zone." },
+          { id: "DET-1020", className: "dog", confidence: 0.91, personName: "German Shepherd", trackingId: "TRK-0109", cameraId: "North Fence Gate", timestamp: new Date(Date.now() - 7200000).toISOString(), note: "K9 patrol vector boundary breach check positive." }
+        ];
+        renderAnimals();
+      }
+    }
+
+    function renderAnimals() {
+      const grid = document.getElementById("animals-grid");
+      if (!grid) return;
+
+      if (animalLogs.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <i class="material-icons text-secondary mb-3" style="font-size: 60px; opacity: 0.2;">pets</i>
+            <h6 class="text-secondary">No Animal Intrusions Recorded</h6>
+            <p class="text-secondary text-xs">Perimeter fences are clear of environmental motion triggers.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = animalLogs.map(log => {
+        const dateObj = new Date(log.timestamp);
+        const dateStr = dateObj.toLocaleDateString();
+        const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const confPct = Math.round(log.confidence * 100) + "%";
+        
+        // Dynamic vector seed
+        const photoUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${log.id}`;
+
+        return `
+          <div class="col-12 col-sm-6 col-md-4 col-xl-3 animal-card animate-fade">
+            <div class="glass-card p-3 text-center border-success border-opacity-10" style="border-width: 1px;">
+              
+              <!-- Animal Illustration/Avatar -->
+              <div class="mb-3 d-inline-block position-relative">
+                <img src="${photoUrl}" alt="${log.className}" class="rounded-circle border border-success p-1 bg-dark bg-opacity-20" style="width: 80px; height: 80px; object-fit: cover;">
+                <span class="position-absolute bottom-0 end-0 badge bg-success p-1 d-flex align-items-center rounded-circle border border-dark">
+                  <i class="material-icons m-0" style="font-size: 11px;">pets</i>
+                </span>
+              </div>
+
+              <!-- Details -->
+              <h6 class="text-primary fw-bold mb-1 text-capitalize">${log.className} Species</h6>
+              <p class="text-secondary text-xs m-0">Descriptor: ${log.personName || "Unidentified"}</p>
+              
+              <div class="my-3 py-2 px-3 bg-dark bg-opacity-25 rounded-3 text-start text-xs text-secondary" style="min-height: 72px; border: 1px solid var(--glass-border);">
+                <strong>Tracking ID:</strong> <span class="font-mono fw-bold text-primary">${log.trackingId}</span><br>
+                <strong>Confidence:</strong> <span class="text-success fw-bold">${confPct}</span><br>
+                <strong>Camera Node:</strong> ${log.cameraId}
+              </div>
+
+              <!-- Bottom details -->
+              <div class="d-flex justify-content-between align-items-center text-xs text-secondary px-1">
+                <span><i class="material-icons align-middle text-sm me-1">calendar_today</i>${dateStr}</span>
+                <span><i class="material-icons align-middle text-sm me-1">schedule</i>${timeStr}</span>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function simulateAnimalBreach() {
+      const speciesList = ["cat", "dog", "bird"];
+      const species = speciesList[Math.floor(Math.random() * speciesList.length)];
+      const names = { cat: "Stray Tabby", dog: "Stray Golden", bird: "Wild Falcon" };
+      
+      const payload = {
+        className: species,
+        confidence: 0.88 + Math.random() * 0.1,
+        personName: names[species],
+        cameraId: "Perimeter West Wall",
+        note: `Motion sensor trigger: ${names[species]} crossing infrared grid.`
+      };
+
+      try {
+        const res = await fetch("/api/detections", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          triggerNotification("Wildlife intrusion synced to cloud storage.", "success");
+          fetchAnimals();
+        }
+      } catch (e) {
+        // Fallback simulation
+        const mockLog = {
+          id: `DET-${1000 + animalLogs.length + 1}`,
+          className: species,
+          confidence: payload.confidence,
+          personName: payload.personName,
+          trackingId: `TRK-0${Math.floor(100 + Math.random() * 900)}`,
+          cameraId: payload.cameraId,
+          timestamp: new Date().toISOString(),
+          note: payload.note,
+          type: "animal"
+        };
+        animalLogs.unshift(mockLog);
+        renderAnimals();
+        triggerNotification(`Local simulation: wildlife breach logged (${species}).`, "success");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision - Statistics & Analytics Center</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar Mount -->
+  <div id="sidebar-container"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="layout-wrapper">
+    <!-- Topbar Mount -->
+    <div id="topbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content container-fluid animate-fade">
+      
+      <!-- Time Range Selector -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h5 class="text-primary fw-bold m-0">Performance Analytics</h5>
+          <p class="text-secondary text-xs m-0">Consolidated graphical intelligence report</p>
+        </div>
+        
+        <!-- Tab Selectors (Daily, Weekly, Monthly) -->
+        <div class="btn-group glass-card p-1" style="border-radius: 12px;">
+          <button class="btn btn-sm btn-glass border-0 active" id="btn-daily" onclick="switchRange('daily')">Daily Logs</button>
+          <button class="btn btn-sm btn-glass border-0" id="btn-weekly" onclick="switchRange('weekly')">Weekly Trend</button>
+          <button class="btn btn-sm btn-glass border-0" id="btn-monthly" onclick="switchRange('monthly')">Monthly Report</button>
+        </div>
+      </div>
+
+      <!-- Analytical Grid -->
+      <div class="row g-4">
+        <!-- 1. Daily/Weekly/Monthly Detection (Area Chart) -->
+        <div class="col-12 col-xl-6">
+          <div class="glass-card p-4">
+            <h5 class="text-primary fw-bold mb-3" id="chart-title-traffic">Daily Detection (Area Chart)</h5>
+            <div style="height: 280px;">
+              <canvas id="trafficAreaChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Human vs Animal (Pie Chart) -->
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="glass-card p-4 h-100">
+            <h5 class="text-primary fw-bold mb-3">Classification Ratio</h5>
+            <div style="height: 240px; display: flex; align-items: center; justify-content: center;">
+              <canvas id="classPieChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Known vs Unknown (Doughnut Chart) -->
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="glass-card p-4 h-100">
+            <h5 class="text-primary fw-bold mb-3">Facial Security</h5>
+            <div style="height: 240px; display: flex; align-items: center; justify-content: center;">
+              <canvas id="facesDoughnutChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Top Detected Species (Bar Chart) -->
+        <div class="col-12 col-xl-6">
+          <div class="glass-card p-4">
+            <h5 class="text-primary fw-bold mb-3">Top Detected Species (Bar Chart)</h5>
+            <div style="height: 260px;">
+              <canvas id="speciesBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Top Active Devices & Average Confidence (Line & Bar) -->
+        <div class="col-12 col-xl-6">
+          <div class="glass-card p-4">
+            <h5 class="text-primary fw-bold mb-3">Device Load vs Confidence Metrics</h5>
+            <div style="height: 260px;">
+              <canvas id="deviceConfidenceChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Mount -->
+    <div id="footer-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout.js"></script>
+  <script>
+    let trafficChart, classChart, facesChart, speciesChart, deviceChart;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initCharts();
+    });
+
+    function switchRange(range) {
+      // Toggle button states
+      document.getElementById("btn-daily").classList.remove("active");
+      document.getElementById("btn-weekly").classList.remove("active");
+      document.getElementById("btn-monthly").classList.remove("active");
+      document.getElementById(`btn-${range}`).classList.add("active");
+
+      // Update Area chart data dynamically to emulate range toggling
+      if (range === 'daily') {
+        document.getElementById("chart-title-traffic").innerText = "Daily Detection (Area Chart)";
+        trafficChart.data.labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
+        trafficChart.data.datasets[0].data = [15, 8, 42, 65, 50, 24];
+      } else if (range === 'weekly') {
+        document.getElementById("chart-title-traffic").innerText = "Weekly Detection (Area Chart)";
+        trafficChart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        trafficChart.data.datasets[0].data = [240, 210, 310, 420, 380, 150, 190];
+      } else {
+        document.getElementById("chart-title-traffic").innerText = "Monthly Detection (Area Chart)";
+        trafficChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        trafficChart.data.datasets[0].data = [1200, 1450, 1890, 2100, 1750, 2400];
+      }
+      trafficChart.update();
+      triggerNotification(`Performance metrics compiled for: ${range}`, "success");
+    }
+
+    function initCharts() {
+      // 1. Traffic Area Chart
+      const trafficCtx = document.getElementById("trafficAreaChart").getContext("2d");
+      trafficChart = new Chart(trafficCtx, {
+        type: 'line',
+        data: {
+          labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+          datasets: [{
+            label: 'Total Logs',
+            data: [15, 8, 42, 65, 50, 24],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+          }
+        }
+      });
+
+      // 2. Class Ratio (Pie Chart)
+      const classCtx = document.getElementById("classPieChart").getContext("2d");
+      classChart = new Chart(classCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Humans', 'Wildlife', 'Vehicles'],
+          datasets: [{
+            data: [75, 18, 7],
+            backgroundColor: ['#3b82f6', '#10b981', '#fbbf24'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10 } } }
+        }
+      });
+
+      // 3. Known vs Unknown (Doughnut Chart)
+      const facesCtx = document.getElementById("facesDoughnutChart").getContext("2d");
+      facesChart = new Chart(facesCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Known Keys', 'Unknown Flags'],
+          datasets: [{
+            data: [68, 32],
+            backgroundColor: ['#10b981', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10 } } }
+        }
+      });
+
+      // 4. Top Detected Species (Bar Chart)
+      const speciesCtx = document.getElementById("speciesBarChart").getContext("2d");
+      speciesChart = new Chart(speciesCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Sapiens', 'Felis Catus', 'Canis Lupus', 'Aves'],
+          datasets: [{
+            label: 'Sightings',
+            data: [142, 12, 8, 4],
+            backgroundColor: '#3b82f6',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+          }
+        }
+      });
+
+      // 5. Device Load vs Confidence (Line/Bar Multi-chart)
+      const deviceCtx = document.getElementById("deviceConfidenceChart").getContext("2d");
+      deviceChart = new Chart(deviceCtx, {
+        type: 'bar',
+        data: {
+          labels: ['CAM-01', 'CAM-02', 'CAM-03', 'CAM-04', 'CAM-05'],
+          datasets: [{
+            type: 'bar',
+            label: 'Capture Count',
+            data: [84, 52, 28, 41, 15],
+            backgroundColor: 'rgba(96, 165, 250, 0.4)',
+            borderRadius: 6
+          }, {
+            type: 'line',
+            label: 'Avg Confidence (%)',
+            data: [96, 89, 91, 98, 93],
+            borderColor: '#10b981',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#94a3b8' } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

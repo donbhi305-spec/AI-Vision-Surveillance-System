@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision Surveillance - Login Portal</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container d-flex justify-content-center py-5">
+    <div class="glass-card p-4 p-md-5 animate-fade text-center" style="max-width: 480px; width: 100%; border-radius: 24px;">
+      
+      <!-- Brand Logo -->
+      <div class="mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-20 rounded-circle mb-3" style="width: 70px; height: 70px; border: 1px solid rgba(var(--accent-rgb), 0.3);">
+          <i class="material-icons text-primary" style="font-size: 38px;">security</i>
+        </div>
+        <h3 class="font-sans fw-bold text-primary mb-1">AI VISION</h3>
+        <p class="text-secondary text-xs">Enterprise Surveillance Web Gateway</p>
+      </div>
+
+      <!-- Error Alert Alert Box -->
+      <div class="alert alert-danger d-none text-xs text-start py-2 px-3 mb-3" id="error-box" style="border-radius: 12px; background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171;">
+        <i class="material-icons align-middle text-sm me-1">error_outline</i>
+        <span id="error-message">Invalid server login response.</span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <!-- Email Input -->
+        <div class="mb-3 text-start">
+          <label class="form-label text-secondary fw-semibold text-xs mb-1 ms-1">Email Address</label>
+          <div class="position-relative">
+            <i class="material-icons text-secondary position-absolute top-50 start-0 translate-middle-y ms-3 text-sm">email</i>
+            <input type="email" class="form-control form-control-glass ps-5 text-sm" id="email" required placeholder="admin@aivision.com" value="admin@aivision.com">
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="mb-3 text-start">
+          <label class="form-label text-secondary fw-semibold text-xs mb-1 ms-1">Security Keyphrase</label>
+          <div class="position-relative">
+            <i class="material-icons text-secondary position-absolute top-50 start-0 translate-middle-y ms-3 text-sm">lock</i>
+            <input type="password" class="form-control form-control-glass ps-5 text-sm" id="password" required placeholder="••••••••" value="admin123">
+          </div>
+        </div>
+
+        <!-- Helper Fields Grid -->
+        <div class="d-flex justify-content-between align-items-center mb-4 text-xs">
+          <div class="form-check text-start">
+            <input type="checkbox" class="form-check-input bg-transparent border-secondary" id="remember-me" checked>
+            <label class="form-check-label text-secondary" for="remember-me">Remember Me</label>
+          </div>
+          <a href="#" class="text-primary text-decoration-none fw-semibold" onclick="handleForgotPassword(event)">Forgot Password?</a>
+        </div>
+
+        <!-- Submit Button with Spinner -->
+        <button type="submit" class="btn btn-glass-primary w-full py-2.5 d-flex align-items-center justify-content-center gap-2" id="submit-btn" style="border-radius: 12px;">
+          <span class="fw-semibold">Authenticate Operator</span>
+          <span class="spinner-border spinner-border-sm d-none" id="loading-spinner" role="status" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <!-- Guest Demo Bypass -->
+      <div class="mt-4 pt-3 border-top border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+        <p class="text-secondary text-xs mb-0">Demo Account Credentials prefilled for convenience.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Initialize LocalStorage parameters
+    window.addEventListener("DOMContentLoaded", () => {
+      // Clear old state
+      localStorage.removeItem("isAdminAuthenticated");
+    });
+
+    function handleLogin(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorBox = document.getElementById("error-box");
+      const submitBtn = document.getElementById("submit-btn");
+      const spinner = document.getElementById("loading-spinner");
+
+      // Reset
+      errorBox.classList.add("d-none");
+      submitBtn.disabled = true;
+      spinner.classList.remove("d-none");
+
+      // Validate credentials (Demo check)
+      setTimeout(() => {
+        if (email.toLowerCase() === "admin@aivision.com" && password === "admin123") {
+          // Success
+          localStorage.setItem("isAdminAuthenticated", "true");
+          // Redirect to dashboard
+          window.location.href = "dashboard.html";
+        } else {
+          // Failure
+          submitBtn.disabled = false;
+          spinner.classList.add("d-none");
+          errorBox.classList.remove("d-none");
+          document.getElementById("error-message").innerText = "Authentication failed. Check your security credentials.";
+        }
+      }, 1200);
+    }
+
+    function handleForgotPassword(e) {
+      e.preventDefault();
+      alert("A biometric backup recovery signal was broadcasted to your verified mobile synchronizer device.");
+    }
+  </script>
+</body>
+</html>

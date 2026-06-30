@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision - Detection History</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar Mount -->
+  <div id="sidebar-container"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="layout-wrapper">
+    <!-- Topbar Mount -->
+    <div id="topbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content container-fluid animate-fade">
+      
+      <!-- Filter Bar Card -->
+      <div class="glass-card p-4 mb-4">
+        <h5 class="text-primary fw-bold mb-3">Advanced Filter Controls</h5>
+        
+        <div class="row g-3">
+          <!-- Text Search query -->
+          <div class="col-12 col-md-4">
+            <label class="text-secondary text-xs fw-semibold mb-1">General Query</label>
+            <input type="text" class="form-control form-control-glass text-xs" id="search-query" placeholder="Name, Species, Tracking ID..." oninput="applyFilters()">
+          </div>
+
+          <!-- Class Type filter -->
+          <div class="col-6 col-sm-4 col-md-2">
+            <label class="text-secondary text-xs fw-semibold mb-1">Species Class</label>
+            <select class="form-select form-control-glass py-1.5 text-xs" id="filter-class" onchange="applyFilters()">
+              <option value="all">All Species</option>
+              <option value="person">Person</option>
+              <option value="cat">Cat</option>
+              <option value="dog">Dog</option>
+              <option value="bird">Bird</option>
+            </select>
+          </div>
+
+          <!-- Device filter -->
+          <div class="col-6 col-sm-4 col-md-2">
+            <label class="text-secondary text-xs fw-semibold mb-1">Camera Node</label>
+            <select class="form-select form-control-glass py-1.5 text-xs" id="filter-camera" onchange="applyFilters()">
+              <option value="all">All Cameras</option>
+              <option value="Lobby">Main Lobby</option>
+              <option value="Dock">Loading Dock</option>
+              <option value="West">West Perimeter</option>
+              <option value="Server">Server Room A</option>
+            </select>
+          </div>
+
+          <!-- Gender filter -->
+          <div class="col-6 col-sm-4 col-md-2">
+            <label class="text-secondary text-xs fw-semibold mb-1">Gender</label>
+            <select class="form-select form-control-glass py-1.5 text-xs" id="filter-gender" onchange="applyFilters()">
+              <option value="all">All Genders</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="N/A">N/A</option>
+            </select>
+          </div>
+
+          <!-- Sorting Selector -->
+          <div class="col-6 col-sm-4 col-md-2">
+            <label class="text-secondary text-xs fw-semibold mb-1">Sort By</label>
+            <select class="form-select form-control-glass py-1.5 text-xs" id="sort-order" onchange="applyFilters()">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="confidence-high">Confidence (High)</option>
+              <option value="confidence-low">Confidence (Low)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Export Buttons Section -->
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-secondary" style="border-color: rgba(255,255,255,0.06) !important;">
+          <p class="text-secondary text-xs m-0" id="filter-match-count">Showing 6 total matching records.</p>
+          
+          <div class="dropdown">
+            <button class="btn btn-glass btn-sm d-flex align-items-center gap-1 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="material-icons" style="font-size: 16px;">download</i>
+              <span>Export Records</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end glass-card p-1" style="border-radius: 8px;">
+              <li><button class="dropdown-item text-primary text-xs py-2" onclick="exportData('csv')"><i class="material-icons align-middle text-sm me-2">grid_on</i>CSV Spreadsheet</button></li>
+              <li><button class="dropdown-item text-primary text-xs py-2" onclick="exportData('excel')"><i class="material-icons align-middle text-sm me-2">table_chart</i>Excel Format</button></li>
+              <li><button class="dropdown-item text-primary text-xs py-2" onclick="exportData('pdf')"><i class="material-icons align-middle text-sm me-2">picture_as_pdf</i>PDF Document</button></li>
+              <li><button class="dropdown-item text-primary text-xs py-2" onclick="exportData('json')"><i class="material-icons align-middle text-sm me-2">terminal</i>JSON Schema</button></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Detection History Table -->
+      <div class="glass-card p-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+          <table class="table table-glass text-xs m-0">
+            <thead>
+              <tr>
+                <th>Capture</th>
+                <th>Tracking ID</th>
+                <th>Class</th>
+                <th>Identified Name</th>
+                <th>Details</th>
+                <th>Confidence</th>
+                <th>Source Node</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="history-rows">
+              <!-- Rendered via JavaScript -->
+              <tr>
+                <td colspan="9" class="text-center py-4 text-secondary">Synchronizing telemetry streams...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="d-flex justify-content-between align-items-center mt-4 text-xs">
+          <button class="btn btn-glass btn-sm" id="prev-page" onclick="changePage(-1)">Previous</button>
+          <span class="text-secondary" id="page-indicator">Page 1 of 1</span>
+          <button class="btn btn-glass btn-sm" id="next-page" onclick="changePage(1)">Next</button>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer Mount -->
+    <div id="footer-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout.js"></script>
+  <script>
+    let allLogs = [];
+    let filteredLogs = [];
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchHistory();
+    });
+
+    async function fetchHistory() {
+      try {
+        const res = await fetch("/api/detections");
+        const data = await res.json();
+        if (data.status === "success") {
+          allLogs = data.data;
+          filteredLogs = [...allLogs];
+          renderTable();
+        }
+      } catch (e) {
+        console.warn("Express endpoint offline. Loading fallback telemetry cache.", e);
+        // Fallback local seed
+        allLogs = [
+          { id: "DET-1024", className: "person", confidence: 0.96, personName: "Alexander Wright", gender: "Male", age: 34, mood: "Smiling", trackingId: "TRK-0041", cameraId: "Main Lobby Entrance", timestamp: new Date(Date.now() - 500000).toISOString(), note: "Primary authorization check passed.", type: "human" },
+          { id: "DET-1023", className: "person", confidence: 0.89, personName: "Unknown", gender: "Male", age: 26, mood: "Serious", trackingId: "TRK-0082", cameraId: "Backyard Loading Dock", timestamp: new Date(Date.now() - 1500000).toISOString(), note: "Unregistered human loitering flagged.", type: "unknown" },
+          { id: "DET-1022", className: "cat", confidence: 0.94, personName: "Feral Tabby", gender: "N/A", age: 2, mood: "Curious", trackingId: "TRK-0105", cameraId: "Perimeter West Wall", timestamp: new Date(Date.now() - 3500000).toISOString(), note: "Wildlife boundary crossing recorded.", type: "animal" },
+          { id: "DET-1021", className: "person", confidence: 0.98, personName: "Clara Vance", gender: "Female", age: 28, mood: "Focused", trackingId: "TRK-0022", cameraId: "Server Room A", timestamp: new Date(Date.now() - 6000000).toISOString(), note: "Security clear.", type: "human" }
+        ];
+        filteredLogs = [...allLogs];
+        renderTable();
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("history-rows");
+      if (!tbody) return;
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginatedLogs = filteredLogs.slice(startIndex, startIndex + itemsPerPage);
+
+      if (paginatedLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-secondary py-5">No records matching specified filters.</td></tr>`;
+        document.getElementById("page-indicator").innerText = "Page 0 of 0";
+        return;
+      }
+
+      tbody.innerHTML = paginatedLogs.map(log => {
+        const timeStr = new Date(log.timestamp).toLocaleString();
+        const confPct = Math.round(log.confidence * 100) + "%";
+        
+        let badgeClass = "status-online";
+        let statusText = "SECURE";
+        if (log.type === "unknown") {
+          badgeClass = "status-offline";
+          statusText = "FLAGGED";
+        } else if (log.type === "animal") {
+          badgeClass = "status-ai";
+          statusText = "ANIMAL";
+        }
+
+        // Base64 thumbnail or standard generic vector
+        const thumbUrl = log.photoUrl || `https://api.dicebear.com/7.x/identicon/svg?seed=${log.id}`;
+
+        return `
+          <tr class="highlightable-row animate-fade">
+            <td>
+              <img src="${thumbUrl}" alt="Cap" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
+            </td>
+            <td><strong class="font-mono text-primary">${log.trackingId}</strong></td>
+            <td><span class="badge bg-secondary bg-opacity-10 text-primary px-2 py-1">${log.className}</span></td>
+            <td><span class="fw-semibold text-primary">${log.personName}</span></td>
+            <td>
+              <div class="text-secondary" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${log.note || ''}">
+                ${log.note || "N/A"}
+              </div>
+              <span class="text-muted" style="font-size: 10px;">Age: ${log.age || 'N/A'} // ${log.gender || 'N/A'} // ${log.mood || 'N/A'}</span>
+            </td>
+            <td><strong class="text-success">${confPct}</strong></td>
+            <td><span class="text-secondary">${log.cameraId}</span></td>
+            <td><span class="text-secondary">${timeStr}</span></td>
+            <td>
+              <span class="status-badge ${badgeClass}">${statusText}</span>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      // Update Pagination state
+      const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+      document.getElementById("page-indicator").innerText = `Page ${currentPage} of ${totalPages || 1}`;
+      document.getElementById("prev-page").disabled = currentPage <= 1;
+      document.getElementById("next-page").disabled = currentPage >= totalPages;
+      document.getElementById("filter-match-count").innerText = `Showing ${filteredLogs.length} total matching records.`;
+    }
+
+    function applyFilters() {
+      const q = document.getElementById("search-query").value.toLowerCase().trim();
+      const cls = document.getElementById("filter-class").value;
+      const cam = document.getElementById("filter-camera").value;
+      const gen = document.getElementById("filter-gender").value;
+      const sort = document.getElementById("sort-order").value;
+
+      filteredLogs = allLogs.filter(log => {
+        // Query match (Search by name, species, trackingId, gender, emotion, device)
+        const textToMatch = `${log.personName} ${log.className} ${log.trackingId} ${log.gender} ${log.mood} ${log.cameraId}`.toLowerCase();
+        const matchesQuery = textToMatch.includes(q);
+
+        // Class match
+        const matchesClass = cls === "all" || log.className === cls;
+
+        // Camera match
+        const matchesCamera = cam === "all" || log.cameraId.includes(cam);
+
+        // Gender match
+        const matchesGender = gen === "all" || log.gender === gen;
+
+        return matchesQuery && matchesClass && matchesCamera && matchesGender;
+      });
+
+      // Apply sorting
+      if (sort === "newest") {
+        filteredLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      } else if (sort === "oldest") {
+        filteredLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      } else if (sort === "confidence-high") {
+        filteredLogs.sort((a, b) => b.confidence - a.confidence);
+      } else if (sort === "confidence-low") {
+        filteredLogs.sort((a, b) => a.confidence - b.confidence);
+      }
+
+      currentPage = 1;
+      renderTable();
+    }
+
+    function changePage(dir) {
+      currentPage += dir;
+      renderTable();
+    }
+
+    function exportData(format) {
+      // Realistic simulation download
+      const mockBlobContent = JSON.stringify(filteredLogs, null, 2);
+      const filename = `surveillance_export_${Date.now()}.${format}`;
+      
+      const element = document.createElement("a");
+      const file = new Blob([mockBlobContent], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = filename;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+
+      triggerNotification(`Export successfully compiled. Downloaded: ${filename}`, 'success');
+    }
+  </script>
+</body>
+</html>

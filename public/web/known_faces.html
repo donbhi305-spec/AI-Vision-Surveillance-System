@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision - Known Faces Registry</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar Mount -->
+  <div id="sidebar-container"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="layout-wrapper">
+    <!-- Topbar Mount -->
+    <div id="topbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content container-fluid animate-fade">
+      
+      <!-- Page Actions Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h5 class="text-primary fw-bold m-0">Biometric Directory</h5>
+          <p class="text-secondary text-xs m-0">Authorized personnel registered on the recognition grid</p>
+        </div>
+        <button class="btn btn-glass-primary btn-sm d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#registerFaceModal">
+          <i class="material-icons" style="font-size: 18px;">person_add</i>
+          <span>Register New Subject</span>
+        </button>
+      </div>
+
+      <!-- Faces Grid Container -->
+      <div class="row g-4" id="faces-grid">
+        <!-- Filled dynamically via JS -->
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="text-secondary text-xs mt-2">Loading authorized facial keys...</p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Register Face Modal -->
+    <div class="modal fade" id="registerFaceModal" tabindex="-1" aria-labelledby="registerFaceModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card p-3" style="border-radius: 16px;">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title text-primary fw-bold" id="registerFaceModalLabel">Biometric Registration</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="register-face-form" onsubmit="handleRegisterFace(event)">
+              <div class="mb-3">
+                <label class="text-secondary text-xs fw-semibold mb-1">Subject Full Name</label>
+                <input type="text" class="form-control form-control-glass text-xs" id="new-name" required placeholder="Alexander Wright">
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="text-secondary text-xs fw-semibold mb-1">Gender</label>
+                  <select class="form-select form-control-glass text-xs py-2" id="new-gender">
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>N/A</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="text-secondary text-xs fw-semibold mb-1">Estimated Age</label>
+                  <input type="number" class="form-control form-control-glass text-xs" id="new-age" value="30">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="text-secondary text-xs fw-semibold mb-1">Security Notes / Clearances</label>
+                <textarea class="form-control form-control-glass text-xs" id="new-notes" rows="2" placeholder="Primary supervisor. Has full-block security clearance."></textarea>
+              </div>
+
+              <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-glass-primary py-2 text-xs">Inject Biometric Reference</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Mount -->
+    <div id="footer-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout.js"></script>
+  <script>
+    let registeredFaces = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchFaces();
+    });
+
+    async function fetchFaces() {
+      try {
+        const res = await fetch("/api/faces");
+        const data = await res.json();
+        if (data.status === "success") {
+          registeredFaces = data.data;
+          renderFaces();
+        }
+      } catch (e) {
+        console.warn("Express backend offline. Loading dynamic local registry cache.", e);
+        // Fallback
+        registeredFaces = [
+          { id: "FC-101", name: "Alexander Wright", gender: "Male", age: 34, moodTrend: "Professional", permissions: "Authorized", registeredAt: new Date(Date.now() - 30*24*3600*1000).toISOString(), avatarSeed: "alex" },
+          { id: "FC-102", name: "Clara Vance", gender: "Female", age: 28, moodTrend: "Friendly", permissions: "Authorized", registeredAt: new Date(Date.now() - 15*24*3600*1000).toISOString(), avatarSeed: "clara" },
+          { id: "FC-103", name: "Marcus Brody", gender: "Male", age: 45, moodTrend: "Serious", permissions: "Authorized", registeredAt: new Date(Date.now() - 60*24*3600*1000).toISOString(), avatarSeed: "marcus" }
+        ];
+        renderFaces();
+      }
+    }
+
+    function renderFaces() {
+      const grid = document.getElementById("faces-grid");
+      if (!grid) return;
+
+      if (registeredFaces.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <i class="material-icons text-secondary mb-3" style="font-size: 60px; opacity: 0.2;">people_outline</i>
+            <h6 class="text-secondary">Face Directory is Empty</h6>
+            <p class="text-secondary text-xs">Register your first security subject to build your key directory.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = registeredFaces.map(face => {
+        const dateStr = new Date(face.registeredAt || Date.now()).toLocaleDateString();
+        // Placeholder avatar
+        const photoUrl = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${face.avatarSeed || face.name}`;
+
+        return `
+          <div class="col-12 col-sm-6 col-md-4 col-xl-3 face-card animate-fade">
+            <div class="glass-card p-3 text-center">
+              
+              <!-- Subject Avatar/Photo -->
+              <div class="position-relative d-inline-block mb-3">
+                <img src="${photoUrl}" alt="${face.name}" class="rounded-circle border border-primary p-1 bg-dark bg-opacity-20" style="width: 80px; height: 80px; object-fit: cover;">
+                <span class="position-absolute bottom-0 end-0 badge bg-success p-1 d-flex align-items-center rounded-circle border border-dark" title="Authorized Access Key">
+                  <i class="material-icons m-0" style="font-size: 11px;">verified_user</i>
+                </span>
+              </div>
+
+              <!-- Content details -->
+              <h6 class="text-primary fw-bold mb-1">${face.name}</h6>
+              <p class="text-secondary text-xs m-0">Gender: ${face.gender} | Est: ${face.age} yrs</p>
+              
+              <div class="my-3 py-2 px-3 bg-dark bg-opacity-25 rounded-3 text-start text-xs text-secondary" style="min-height: 52px; border: 1px solid var(--glass-border);">
+                <strong>Notes:</strong> ${face.moodTrend ? `Behavior: ${face.moodTrend}.` : ''} Registered on: ${dateStr}.
+              </div>
+
+              <!-- Controls -->
+              <div class="d-flex justify-content-between gap-2 mt-2">
+                <button class="btn btn-glass btn-sm flex-grow-1 text-xs py-1.5" onclick="viewFace('${face.id}')">View</button>
+                <button class="btn btn-glass btn-sm text-xs py-1.5 text-danger" onclick="deleteFace('${face.id}')"><i class="material-icons m-0 text-danger" style="font-size: 16px;">delete</i></button>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function handleRegisterFace(e) {
+      e.preventDefault();
+      const name = document.getElementById("new-name").value;
+      const gender = document.getElementById("new-gender").value;
+      const age = document.getElementById("new-age").value;
+      const notes = document.getElementById("new-notes").value;
+
+      try {
+        const res = await fetch("/api/faces/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, gender, age, moodTrend: notes })
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          triggerNotification(`Injected ${name} into biometric storage.`, "success");
+          
+          // Close modal
+          const modalEl = document.getElementById('registerFaceModal');
+          const modalInstance = bootstrap.Modal.getInstance(modalEl);
+          modalInstance.hide();
+          
+          // Clear inputs
+          document.getElementById("register-face-form").reset();
+          
+          // Reload
+          fetchFaces();
+        }
+      } catch (err) {
+        // Fallback for static mode
+        const mockFace = {
+          id: `FC-${100 + registeredFaces.length + 1}`,
+          name,
+          gender,
+          age: parseInt(age),
+          moodTrend: notes,
+          registeredAt: new Date().toISOString(),
+          avatarSeed: name.toLowerCase().replace(/\s+/g, '')
+        };
+        registeredFaces.unshift(mockFace);
+        renderFaces();
+        
+        // Close modal
+        const modalEl = document.getElementById('registerFaceModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        modalInstance.hide();
+        document.getElementById("register-face-form").reset();
+        
+        triggerNotification(`Dynamic injection simulated for: ${name}`, "success");
+      }
+    }
+
+    async function deleteFace(id) {
+      if (!confirm("Remove this biometric target reference?")) return;
+
+      try {
+        const res = await fetch(`/api/faces/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.status === "success") {
+          triggerNotification("Reference successfully deleted.", "success");
+          fetchFaces();
+        }
+      } catch (e) {
+        // Fallback
+        registeredFaces = registeredFaces.filter(f => f.id !== id);
+        renderFaces();
+        triggerNotification("Subject reference cleared from temporary directory.", "warning");
+      }
+    }
+
+    function viewFace(id) {
+      const face = registeredFaces.find(f => f.id === id);
+      if (face) {
+        alert(`Biometric Metadata View:\nName: ${face.name}\nGender: ${face.gender}\nAge: ${face.age}\nRegistered: ${new Date(face.registeredAt).toLocaleString()}`);
+      }
+    }
+  </script>
+</body>
+</html>

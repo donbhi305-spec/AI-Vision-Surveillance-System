@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision Dashboard - Control Center</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar Mount -->
+  <div id="sidebar-container"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="layout-wrapper">
+    <!-- Topbar Mount -->
+    <div id="topbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content container-fluid animate-fade">
+      
+      <!-- Metrics Cards Section -->
+      <div class="row g-3 mb-4">
+        <!-- Today's Detections -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--accent-color);">
+              <i class="material-icons" style="font-size: 28px;">visibility</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Today's Detections</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-detections">142</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Known Faces -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-success bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--success-color);">
+              <i class="material-icons" style="font-size: 28px;">face</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Known Faces</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-known">5</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unknown Faces -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-danger bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--danger-color);">
+              <i class="material-icons" style="font-size: 28px;">portrait</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Unknown Faces</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-unknown">8</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animals -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-info bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--info-color);">
+              <i class="material-icons" style="font-size: 28px;">pets</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Animals Tracked</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-animals">12</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Online Devices -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-success bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--success-color);">
+              <i class="material-icons" style="font-size: 28px;">phone_android</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Online Devices</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-online-devices">3</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Offline Devices -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-warning bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--warning-color);">
+              <i class="material-icons" style="font-size: 28px;">phonelink_off</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Offline Devices</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-offline-devices">1</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Average Confidence -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--accent-color);">
+              <i class="material-icons" style="font-size: 28px;">verified</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Avg. Confidence</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-confidence">93.4%</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Images Stored -->
+        <div class="col-6 col-md-4 col-xl-3">
+          <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="bg-secondary bg-opacity-20 rounded-circle p-2.5 d-flex align-items-center justify-content-center" style="color: var(--text-primary);">
+              <i class="material-icons" style="font-size: 28px;">storage</i>
+            </div>
+            <div>
+              <p class="text-secondary text-xs m-0 fw-semibold">Images Stored</p>
+              <h4 class="text-primary fw-bold m-0" id="stat-storage">1,024</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="row g-4 mb-4">
+        <!-- Main Line Chart -->
+        <div class="col-12 col-xl-8">
+          <div class="glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="text-primary fw-bold m-0">Surveillance Traffic Activity</h5>
+              <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 text-xs" style="border-radius: 8px;">Real-Time Logging Feed</span>
+            </div>
+            <div style="height: 320px;">
+              <canvas id="activityChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doughnut distribution -->
+        <div class="col-12 col-xl-4">
+          <div class="glass-card p-4 h-100">
+            <h5 class="text-primary fw-bold mb-3">Detections Category Share</h5>
+            <div style="height: 260px; display: flex; align-items: center; justify-content: center;">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Camera Streams Sandbox -->
+      <div class="glass-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h5 class="text-primary fw-bold m-0">Active Video Channels</h5>
+            <p class="text-secondary text-xs m-0">Real-time synchronized CCTV sensors</p>
+          </div>
+          <a href="live.html" class="btn btn-glass btn-sm d-flex align-items-center gap-1">
+            <i class="material-icons" style="font-size: 16px;">sensors</i>
+            <span>Full Monitor</span>
+          </a>
+        </div>
+
+        <div class="row g-3">
+          <!-- Live channel cards -->
+          <div class="col-12 col-sm-6 col-md-4 col-xl">
+            <div class="glass-card p-2 border-0" style="background: rgba(0,0,0,0.15);">
+              <div class="position-relative overflow-hidden mb-2" style="border-radius: 8px; height: 120px; background: #000;">
+                <div class="position-absolute top-0 start-0 m-2 badge bg-success text-xs d-flex align-items-center gap-1">
+                  <span class="pulse-indicator"></span>LIVE
+                </div>
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary text-xs">
+                  <i class="material-icons me-1" style="font-size: 16px;">videocam</i> Main Lobby
+                </div>
+              </div>
+              <div class="px-1 text-xs text-primary fw-semibold">CAM-01: Front Entry</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-4 col-xl">
+            <div class="glass-card p-2 border-0" style="background: rgba(0,0,0,0.15);">
+              <div class="position-relative overflow-hidden mb-2" style="border-radius: 8px; height: 120px; background: #000;">
+                <div class="position-absolute top-0 start-0 m-2 badge bg-success text-xs d-flex align-items-center gap-1">
+                  <span class="pulse-indicator"></span>LIVE
+                </div>
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary text-xs">
+                  <i class="material-icons me-1" style="font-size: 16px;">videocam</i> Loading Dock
+                </div>
+              </div>
+              <div class="px-1 text-xs text-primary fw-semibold">CAM-02: Backyard Gate</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-4 col-xl">
+            <div class="glass-card p-2 border-0" style="background: rgba(0,0,0,0.15);">
+              <div class="position-relative overflow-hidden mb-2" style="border-radius: 8px; height: 120px; background: #000;">
+                <div class="position-absolute top-0 start-0 m-2 badge bg-success text-xs d-flex align-items-center gap-1">
+                  <span class="pulse-indicator"></span>LIVE
+                </div>
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary text-xs">
+                  <i class="material-icons me-1" style="font-size: 16px;">videocam</i> West Fence
+                </div>
+              </div>
+              <div class="px-1 text-xs text-primary fw-semibold">CAM-03: Perimeter Wall</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-4 col-xl">
+            <div class="glass-card p-2 border-0" style="background: rgba(0,0,0,0.15);">
+              <div class="position-relative overflow-hidden mb-2" style="border-radius: 8px; height: 120px; background: #000;">
+                <div class="position-absolute top-0 start-0 m-2 badge bg-success text-xs d-flex align-items-center gap-1">
+                  <span class="pulse-indicator"></span>LIVE
+                </div>
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary text-xs">
+                  <i class="material-icons me-1" style="font-size: 16px;">videocam</i> Server Room A
+                </div>
+              </div>
+              <div class="px-1 text-xs text-primary fw-semibold">CAM-04: Vault Gate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Mount -->
+    <div id="footer-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout.js"></script>
+  <script>
+    // Fetch and sync actual data
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchDashboardStats();
+      initCharts();
+    });
+
+    async function fetchDashboardStats() {
+      try {
+        const res = await fetch("/api/statistics");
+        const data = await res.json();
+        if (data.status === "success") {
+          const metrics = data.metrics;
+          document.getElementById("stat-detections").innerText = metrics.totalDetections || "0";
+          document.getElementById("stat-known").innerText = metrics.knownMatched || "0";
+          document.getElementById("stat-unknown").innerText = metrics.unknownAlerted || "0";
+          document.getElementById("stat-animals").innerText = metrics.animalsTracked || "0";
+        }
+      } catch (e) {
+        console.warn("Express backend offline or static mode. Using prefilled values.", e);
+      }
+    }
+
+    function initCharts() {
+      // Activity line chart
+      const actCtx = document.getElementById('activityChart').getContext('2d');
+      new Chart(actCtx, {
+        type: 'line',
+        data: {
+          labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+          datasets: [{
+            label: 'Human Detections',
+            data: [12, 19, 32, 25, 45, 30, 20, 15],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.4
+          }, {
+            label: 'Animal Intrusion',
+            data: [3, 2, 0, 1, 4, 3, 5, 8],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8' } }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+          }
+        }
+      });
+
+      // Category Doughnut chart
+      const catCtx = document.getElementById('categoryChart').getContext('2d');
+      new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Known Face', 'Unknown Face', 'Animals', 'Vehicles'],
+          datasets: [{
+            data: [45, 25, 15, 15],
+            backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#fbbf24'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

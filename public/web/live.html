@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Vision - Live surveillance Monitor</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Glassmorphic CSS -->
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .scanner-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 15px 4px rgba(59, 130, 246, 0.8);
+      animation: scanEffect 3s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes scanEffect {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Mount -->
+  <div id="sidebar-container"></div>
+
+  <!-- Layout Wrapper -->
+  <div class="layout-wrapper">
+    <!-- Topbar Mount -->
+    <div id="topbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content container-fluid animate-fade">
+      
+      <div class="row g-4">
+        <!-- Live Video Stream and Controls (Left/Center) -->
+        <div class="col-12 col-xl-8">
+          <div class="glass-card p-3 mb-4">
+            
+            <!-- Stream Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-danger d-flex align-items-center gap-1 px-2 py-1.5" style="border-radius: 6px;">
+                  <span class="pulse-indicator"></span>LIVE FEED
+                </span>
+                <span class="text-primary text-xs fw-semibold">CAM-01 Front Lobby Entrance</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-glass btn-sm p-1.5" title="Pause Stream"><i class="material-icons m-0">pause</i></button>
+                <button class="btn btn-glass btn-sm p-1.5" title="Take Screenshot" onclick="triggerNotification('Snapshot captured to server repository.', 'success')"><i class="material-icons m-0">camera_alt</i></button>
+                <button class="btn btn-glass btn-sm p-1.5 text-danger" title="Stop Stream"><i class="material-icons m-0">videocam_off</i></button>
+              </div>
+            </div>
+
+            <!-- Video Stage with Scanner Lines and Bounding Box overlay -->
+            <div class="bounding-box-container bg-dark overflow-hidden position-relative d-flex align-items-center justify-content-center" style="border-radius: 12px; height: 420px; border: 1px solid var(--glass-border);">
+              <div class="scanner-line"></div>
+              
+              <!-- Dummy visual grid -->
+              <div class="position-absolute w-100 h-100 d-flex flex-column justify-content-between p-3 opacity-15" style="pointer-events: none;">
+                <div class="d-flex justify-content-between">
+                  <span class="text-white text-xs fw-bold font-mono">LOBBY_BLOCK_A</span>
+                  <span class="text-white text-xs fw-bold font-mono">1080P // 30 FPS</span>
+                </div>
+                <div class="text-center text-white text-xs font-mono">UTC +07:00 ACTIVE NETWORK</div>
+              </div>
+
+              <!-- Animated bounding box preview representing target locking -->
+              <div class="bounding-box" id="live-bounding-box" style="top: 120px; left: 240px; width: 140px; height: 160px; transition: all 0.6s ease;">
+                Target: person
+                <div class="text-xs fw-normal" style="font-size: 9px;">TRK-0041 // 96%</div>
+              </div>
+
+              <!-- Background preview graphic representation -->
+              <div class="text-center p-4">
+                <i class="material-icons text-secondary mb-3" style="font-size: 72px; opacity: 0.3;">photo_camera</i>
+                <h5 class="text-secondary fw-semibold">Dynamic Surveillance Sandbox</h5>
+                <p class="text-secondary text-xs max-w-sm mx-auto">Emulating real-time video flow with camera overlay grids. Connect your smartphone camera in Devices tab to project actual live feeds here!</p>
+              </div>
+
+            </div>
+
+            <!-- Sandbox Adjustments panel -->
+            <div class="row g-3 mt-3">
+              <div class="col-6 col-md-3">
+                <label class="text-secondary text-xs fw-semibold mb-1">FPS Target</label>
+                <select class="form-select form-control-glass py-1.5 text-xs" onchange="triggerNotification('FPS synced to: ' + this.value, 'info')">
+                  <option>30 FPS</option>
+                  <option>60 FPS (Pro)</option>
+                  <option>15 FPS (Eco)</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="text-secondary text-xs fw-semibold mb-1">Resolution</label>
+                <select class="form-select form-control-glass py-1.5 text-xs" onchange="triggerNotification('Stream scale resized.', 'info')">
+                  <option>1080p Full HD</option>
+                  <option>720p HD</option>
+                  <option>4K Ultra HD</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="text-secondary text-xs fw-semibold mb-1">HDR Enhance</label>
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input bg-transparent border-secondary" type="checkbox" id="hdr-toggle" checked>
+                  <label class="form-check-label text-secondary text-xs" for="hdr-toggle">Active</label>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="text-secondary text-xs fw-semibold mb-1">Auto Refresh (1s)</label>
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input bg-transparent border-secondary" type="checkbox" id="auto-refresh-toggle" checked>
+                  <label class="form-check-label text-secondary text-xs" for="auto-refresh-toggle">Active</label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Real-Time Detection Details Sidebar (Right) -->
+        <div class="col-12 col-xl-4">
+          <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="text-primary fw-bold m-0">Target Telemetry</h5>
+              <span class="badge bg-primary bg-opacity-20 text-primary text-xs py-1.5" id="telemetry-status">UPDATING</span>
+            </div>
+
+            <!-- Attributes grid list -->
+            <div class="d-flex flex-column gap-3 mb-4 text-sm">
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Tracking ID:</span>
+                <span class="text-primary fw-bold" id="live-track-id">TRK-0041</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Detection Type:</span>
+                <span class="badge bg-primary text-xs" id="live-class-name">person</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Assigned Name:</span>
+                <span class="text-primary fw-semibold" id="live-name">Alexander Wright</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Species Class:</span>
+                <span class="text-primary" id="live-species">Homo Sapiens</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Estimated Age:</span>
+                <span class="text-primary" id="live-age">34 yrs</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Gender Accent:</span>
+                <span class="text-primary" id="live-gender">Male</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Detected Emotion:</span>
+                <span class="text-primary" id="live-emotion">Smiling</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">AI Confidence:</span>
+                <span class="text-success fw-bold" id="live-confidence">96%</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom border-secondary pb-2" style="border-color: rgba(255,255,255,0.06) !important;">
+                <span class="text-secondary">Device Node:</span>
+                <span class="text-primary" id="live-device">Main Lobby Entrance</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="text-secondary">Timestamp:</span>
+                <span class="text-primary" id="live-timestamp">2026-06-30 02:28</span>
+              </div>
+            </div>
+
+            <!-- Verification Action keys -->
+            <div class="d-grid gap-2">
+              <button class="btn btn-glass btn-sm py-2" onclick="triggerNotification('Target logged permanently into records.', 'success')">Verify Identity</button>
+              <button class="btn btn-glass-primary btn-sm py-2" onclick="triggerNotification('Security warning broadcasted.', 'danger')">Raise Silent Alarm</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Mount -->
+    <div id="footer-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="layout.js"></script>
+  <script>
+    // Live polling simulation
+    let targets = [
+      { id: "TRK-0041", class: "person", name: "Alexander Wright", species: "Homo Sapiens", age: "34 yrs", gender: "Male", emotion: "Smiling", confidence: "96%", device: "Main Lobby Entrance", top: 120, left: 240, width: 140, height: 160 },
+      { id: "TRK-0082", class: "person", name: "???? Unknown", species: "Human", age: "22–28", gender: "Male", emotion: "Happy", confidence: "98.4%", device: "Backyard Loading Dock", top: 80, left: 160, width: 160, height: 200 },
+      { id: "TRK-0105", class: "cat", name: "Feral Tabby", species: "Felis Catus", age: "2 yrs", gender: "N/A", emotion: "Curious", confidence: "94%", device: "Perimeter West Wall", top: 220, left: 320, width: 100, height: 90 },
+      { id: "TRK-0022", class: "person", name: "Clara Vance", species: "Homo Sapiens", age: "28 yrs", gender: "Female", emotion: "Focused", confidence: "98%", device: "Server Room A", top: 100, left: 220, width: 130, height: 170 }
+    ];
+
+    let currentIndex = 0;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Setup live refresh loop every 1.5 seconds
+      setInterval(() => {
+        const autoRefresh = document.getElementById("auto-refresh-toggle").checked;
+        if (!autoRefresh) return;
+
+        currentIndex = (currentIndex + 1) % targets.length;
+        const currentTarget = targets[currentIndex];
+
+        // Update telemetry sidebar fields
+        document.getElementById("live-track-id").innerText = currentTarget.id;
+        document.getElementById("live-class-name").innerText = currentTarget.class;
+        document.getElementById("live-name").innerText = currentTarget.name;
+        document.getElementById("live-species").innerText = currentTarget.species;
+        document.getElementById("live-age").innerText = currentTarget.age;
+        document.getElementById("live-gender").innerText = currentTarget.gender;
+        document.getElementById("live-emotion").innerText = currentTarget.emotion;
+        document.getElementById("live-confidence").innerText = currentTarget.confidence;
+        document.getElementById("live-device").innerText = currentTarget.device;
+        
+        const now = new Date();
+        document.getElementById("live-timestamp").innerText = now.toLocaleString();
+
+        // Reposition animated bounding box on stage
+        const bbox = document.getElementById("live-bounding-box");
+        if (bbox) {
+          bbox.style.top = currentTarget.top + "px";
+          bbox.style.left = currentTarget.left + "px";
+          bbox.style.width = currentTarget.width + "px";
+          bbox.style.height = currentTarget.height + "px";
+          bbox.innerHTML = `
+            Target: ${currentTarget.class}
+            <div class="text-xs fw-normal" style="font-size: 9px;">${currentTarget.id} // ${currentTarget.confidence}</div>
+          `;
+        }
+
+        // Pulse telemetry state badge
+        const telemetryStatus = document.getElementById("telemetry-status");
+        telemetryStatus.innerText = "LOCKED";
+        telemetryStatus.className = "badge bg-success text-xs py-1.5";
+        setTimeout(() => {
+          telemetryStatus.className = "badge bg-primary bg-opacity-20 text-primary text-xs py-1.5";
+        }, 300);
+
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

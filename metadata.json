@@ -1,0 +1,10 @@
+{
+  "name": "AI Vision Surveillance System",
+  "description": "Enterprise-grade AI-powered surveillance dashboard and mobile synchronizer featuring live camera streams, real-time face recognition, unknown face detection, animal classification, statistical insights, and a downloadable Android source codebase.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
