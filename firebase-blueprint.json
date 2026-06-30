@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "Detection": {
+      "title": "Detection Log",
+      "description": "A surveillance detection event captured by the VisionGuard Pro AI camera",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "className": { "type": "string" },
+        "confidence": { "type": "number" },
+        "personName": { "type": "string" },
+        "gender": { "type": "string" },
+        "age": { "type": "number" },
+        "mood": { "type": "string" },
+        "trackingId": { "type": "string" },
+        "cameraId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "photoUrl": { "type": "string" },
+        "note": { "type": "string" },
+        "type": { "type": "string", "enum": ["human", "animal", "unknown"] }
+      },
+      "required": ["id", "className", "confidence", "timestamp", "type"]
+    },
+    "KnownFace": {
+      "title": "Registered Known Face",
+      "description": "Biometric face registration for secure verification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "gender": { "type": "string" },
+        "age": { "type": "number" },
+        "moodTrend": { "type": "string" },
+        "permissions": { "type": "string", "enum": ["Authorized", "Restricted", "Flagged"] },
+        "registeredAt": { "type": "string", "format": "date-time" },
+        "avatarSeed": { "type": "string" }
+      },
+      "required": ["id", "name", "permissions", "registeredAt"]
+    },
+    "BackupCheckpoint": {
+      "title": "Backup Checkpoint",
+      "description": "A stashed backup checkpoint of surveillance records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "recordsCount": { "type": "number" },
+        "facesCount": { "type": "number" },
+        "detections": { "type": "array" },
+        "faces": { "type": "array" }
+      },
+      "required": ["id", "timestamp", "recordsCount", "facesCount"]
+    }
+  },
+  "firestore": {
+    "users/{userId}/detections/{detectionId}": {
+      "schema": "Detection",
+      "description": "Real-time AI camera detection logs for the logged-in user"
+    },
+    "users/{userId}/faces/{faceId}": {
+      "schema": "KnownFace",
+      "description": "Registered face directory for biometric identification"
+    },
+    "users/{userId}/backups/{backupId}": {
+      "schema": "BackupCheckpoint",
+      "description": "Archived snapshot database records"
+    }
+  }
+}

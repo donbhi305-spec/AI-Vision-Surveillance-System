@@ -524,7 +524,7 @@ app.post("/api/gemini/analyze", async (req, res) => {
     
     // Create actual log entry
     const newLog: DetectionLog = {
-      id: `DET-${1000 + detections.length + 1}`,
+      id: `DET-${Date.now()}`,
       className: chosen.className,
       confidence: chosen.confidence,
       personName: chosen.personName,
@@ -540,8 +540,6 @@ app.post("/api/gemini/analyze", async (req, res) => {
         ? (chosen.personName === "Unknown" ? "unknown" : "human") 
         : "animal"
     };
-
-    detections.unshift(newLog);
 
     return res.json({
       status: "success",
@@ -614,7 +612,7 @@ You MUST respond strictly in JSON matching this schema:
       : "animal";
 
     const newLog: DetectionLog = {
-      id: `DET-${1000 + detections.length + 1}`,
+      id: `DET-${Date.now()}`,
       className: payload.className || "unidentified",
       confidence: payload.confidence || 0.85,
       personName: payload.personName || "Unknown",
@@ -628,8 +626,6 @@ You MUST respond strictly in JSON matching this schema:
       note: payload.analysisSummary || "Object logged on camera analyzer stream.",
       type: logType as "human" | "animal" | "unknown"
     };
-
-    detections.unshift(newLog);
 
     res.json({
       status: "success",
